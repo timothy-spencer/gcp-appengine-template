@@ -13,7 +13,7 @@ jobs:
           command: |
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
-            gsutil mb gs://gcp-test-terraform-state-$GOOGLE_PROJECT_ID || true
+            gsutil mb gs://gcp-terraform-state-$GOOGLE_PROJECT_ID || true
       - run:
           name: Enabling APIs
           command: ./terraform/enable-apis.sh
@@ -40,7 +40,7 @@ jobs:
           name: Initialize Terraform
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
-            cd terraform && terraform init -backend-config="bucket=gcp-test-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
+            cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform plan -input=false
   apply_terraform:
     docker:
       - image: hashicorp/terraform:0.11.11
@@ -54,7 +54,7 @@ jobs:
           name: Apply Terraform
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
-            cd terraform && terraform init -backend-config="bucket=gcp-test-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
+            cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
             terraform output > /tmp/workspace/tf-output.json
       - persist_to_workspace:
           root: /tmp/workspace

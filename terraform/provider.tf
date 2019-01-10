@@ -8,6 +8,6 @@ terraform {
   backend "gcs" {
     credentials = "~/gcloud-service-key.json"
     # Cannot interpolate, so we will feed this in on the commandline
-    #bucket      = "gcp-test-terraform-state-${var.project_id}"
+    #bucket      = "gcp-terraform-state-${var.project_id}"
   }
 }
