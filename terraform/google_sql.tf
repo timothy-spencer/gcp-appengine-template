@@ -1,7 +1,7 @@
-// MySQL Database
-resource "google_sql_database_instance" "gcp-pilot-sql-mysql" {
-  name = "gcppilot-mysql-example"
-  database_version = "MYSQL_5_6"
+// Postgres Database
+resource "google_sql_database_instance" "gcp-pilot-sql-postgres" {
+  name = "gcppilot-postgres-example"
+  database_version = "POSTGRES_9_6"
   region = "${var.region}"
 
   settings {
@@ -9,28 +9,23 @@ resource "google_sql_database_instance" "gcp-pilot-sql-mysql" {
   }
 }
 
-resource "google_sql_database" "mysql" {
-  name      = "mysql"
-  instance  = "${google_sql_database_instance.gcp-pilot-sql-mysql.name}"
-}
-
-resource "random_string" "mysql_password" {
+resource "random_string" "postgres_password" {
   length  = 16
   special = true
 }
 
-variable "mysql_password" {
-  type = "string"
-  default = ""
+resource "google_sql_user" "postgres" {
+  name     = "postgres"
+  password = "${random_string.postgres_password.result}"
+  instance = "${google_sql_database_instance.gcp-pilot-sql-postgres.name}"
 }
 
-resource "google_sql_user" "mysql" {
-  name     = "mysql"
-  password = "${var.mysql_password != "" ? var.mysql_password : random_string.mysql_password.result}"
-  instance = "${google_sql_database_instance.gcp-pilot-sql-mysql.name}"
+output "postgres_password" {
+  value = "${random_string.postgres_password.result}"
+  description = "Postgres password"
 }
 
-output "java_jdbc_connection_string" {
-  value = "jdbc:mysql://google/${google_sql_user.mysql.name}?cloudSqlInstance=${google_sql_database_instance.gcp-pilot-sql-mysql.connection_name}&password=${google_sql_user.mysql.password}&useSSL=false"
+output "postgres_username" {
+  value = "${google_sql_user.name}"
+  description = "Postgres password"
 }
-

@@ -14,15 +14,16 @@ Terraform and the Google Cloud SDK are invoked on commit by Circle CI, which
 enables required APIs, creates a Terraform plan, and waits for operator approval
 prior to changing production.
 
-Java Spring Boot / App Engine
+Rails / App Engine
 =============================
-To test locally run `mvn appengine:run`.  There are two sets of AppEngine
-plugins available, use the
-[Cloud SDK based Maven plugin](https://cloud.google.com/appengine/docs/standard/java/tools/maven-reference)
-for reference.
+To test locally run `cd rails-example && bin/rails server`.
 
 .NET Core / App Engine
 ======================
+XXX
+
+Java Spring Boot / App Engine
+=============================
 XXX
 
 Bootstrap Process

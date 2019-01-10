@@ -1,0 +1,14 @@
+# The xYYYx strings in here are replaced at deploy time by proper values.
+# see .circleci/config.yml for where this happens.
+entrypoint: bundle exec rackup --port $PORT
+env: flex
+runtime: ruby
+
+env_variables:
+  SECRET_KEY_BASE: xSECRET_KEY_BASEx
+  CLOUDSQL_USERNAME: xCLOUDSQL_USERNAMEx
+  CLOUDSQL_PASSWORD: xCLOUDSQL_PASSWORDx
+  CLOUDSQL_INSTANCE: xCLOUDSQL_INSTANCEx
+
+beta_settings:
+  cloud_sql_instances: xCLOUDSQL_INSTANCEx

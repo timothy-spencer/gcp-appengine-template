@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Store Service Account
+          name: Store Service Account key
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
       - run:
           name: Setup Google Cloud SDK
@@ -20,6 +20,14 @@ jobs:
       - run:
           name: Enable Audit Logging
           command: ./terraform/enable-audit-logs.sh
+      - run:
+          name: make sure jq is installed
+          command: apk add jq
+      - run:
+          name: Enable app to do schema migrations
+          command: |
+            export PROJECT_NUMBER=`gcloud projects describe ${GOOGLE_PROJECT_ID} --format=json | jq -r .projectNumber`
+            gcloud projects add-iam-policy-binding ${GOOGLE_PROJECT_ID} --member=serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com --role=roles/editor
   plan_terraform:
     docker:
       - image: hashicorp/terraform:0.11.11
@@ -41,14 +49,20 @@ jobs:
       - run:
           name: Store Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run: mkdir /tmp/workspace
       - run:
           name: Apply Terraform
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             cd terraform && terraform init -backend-config="bucket=gcp-test-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
-  deploy: &deploy
+            terraform output > /tmp/workspace/tf-output.json
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - tf-output.json
+  deploy-rails: &deploy-rails
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: circleci/ruby:2.5.3-alpine3.8
     steps:
       - checkout
       - run:
@@ -56,18 +70,23 @@ jobs:
           command: |
             git submodule init
             git submodule update --remote
-      # Download and cache dependencies
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "getting-started-java/helloworld-springboot/pom.xml" }}
+            - v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
             - v1-dependencies-
       - run:
-          name: Store Service Account
-          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+          name: Install Ruby dependencies
+          command: |
+            cd rails-example
+            bundle check || bundle install
+      - save_cache:
+          key: v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
+          paths:
+            - rails-example/vendor/bundle
       - run:
           name: Setup Google Cloud SDK
           command: |
-            export GCLOUD_SDK_VERSION=229
+            export GCLOUD_SDK_VERSION=204
             curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-$GCLOUD_SDK_VERSION.0.0-linux-x86_64.tar.gz -o ./gcloud-sdk.tar.gz
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
@@ -76,24 +95,40 @@ jobs:
             gcloud config set project $GOOGLE_PROJECT_ID
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
-      - run: cd getting-started-java/helloworld-springboot && mvn dependency:go-offline
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "getting-started-java/helloworld-springboot/pom.xml" }}
-  deploy-dev:
-    <<: *deploy
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: prepare app engine config
+          command: |
+            apk add jq
+            export RAILS_SECRET=`jq -r .rails_secret < /tmp/workspace/tf-output.json`
+            export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/workspace/tf-output.json`
+            export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/workspace/tf-output.json`
+            export CONNECTION_NAME=`gcloud sql instances describe XXX --format=json | jq -r .connectionName`
+            sed -i tmp "s/xSECRET_KEY_BASEx/${RAILS_SECRET}/" rails-example/app.yaml
+            sed -i tmp "s/xCLOUDSQL_USERNAMEx/${CLOUDSQL_USERNAME}/" rails-example/app.yaml
+            sed -i tmp "s/xCLOUDSQL_PASSWORDx/${CLOUDSQL_PASSWORD}/" rails-example/app.yaml
+            sed -i tmp "s/xCLOUDSQL_INSTANCEx/${CONNECTION_NAME}/" rails-example/app.yaml
+      - run:
+          name: deploy to app engine
+          command: |
+            cd rails-example
+            bundle exec bin/rails assets:precompile
+  deploy-rails-dev:
+    <<: *deploy-rails
     steps:
-      - run: cd getting-started-java/helloworld-springboot && mvn appengine:deploy --version=dev --no-promote
-  deploy-staging:
-    <<: *deploy
+      - run: cd rails-example && gcloud app deploy --no-promote --version=dev
+      - run: cd rails-example && bundle exec rake appengine:exec --version=dev -- bundle exec rake db:migrate
+  deploy-rails-staging:
+    <<: *deploy-rails
     steps:
-      - run: cd getting-started-java/helloworld-springboot && mvn appengine:deploy --version=staging --no-promote
-  deploy-prod:
-    <<: *deploy
+      - run: cd rails-example && gcloud app deploy --no-promote --version=staging
+      - run: cd rails-example && bundle exec rake appengine:exec --version=staging -- bundle exec rake db:migrate
+  deploy-rails-prod:
+    <<: *deploy-rails
     steps:
-      - run: cd getting-started-java/helloworld-springboot && mvn appengine:deploy
-
+      - run: cd rails-example && gcloud app deploy
+      - run: cd rails-example && bundle exec rake appengine:exec -- bundle exec rake db:migrate
 workflows:
   version: 2
   terraform:
@@ -111,20 +146,20 @@ workflows:
             - hold_terraform
       - production_deploy_hold:
           type: approval
-      - deploy-dev:
+      - deploy-rails-dev:
           filters:
             branches:
               only:
                 - dev
-      - deploy-staging:
+      - deploy-rails-staging:
           filters:
             branches:
               only:
                 - master
-      - deploy-prod:
+      - deploy-rails-prod:
           requires:
             - production_deploy_hold
-            - deploy-staging
+            - deploy-rails-staging
           filters:
             branches:
               only:
