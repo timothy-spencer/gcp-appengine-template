@@ -26,6 +26,6 @@ output "postgres_password" {
 }
 
 output "postgres_username" {
-  value = "${google_sql_user.name}"
-  description = "Postgres password"
+  value = "${google_sql_user.postgres.name}"
+  description = "Postgres username"
 }
