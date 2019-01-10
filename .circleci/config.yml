@@ -62,7 +62,7 @@ jobs:
             - tf-output.json
   deploy-rails: &deploy-rails
     docker:
-      - image: circleci/ruby:2.5.3-alpine3.8
+      - image: circleci/ruby:2.5.3-stretch
     steps:
       - checkout
       - run:
