@@ -118,21 +118,21 @@ jobs:
     docker:
       - image: circleci/ruby:2.5.3-stretch
     steps:
-      <<: *deploy-steps
+      - *deploy-steps
       - run: cd rails-example && gcloud app deploy --no-promote --version=dev
       - run: cd rails-example && bundle exec rake appengine:exec --version=dev -- bundle exec rake db:migrate
   deploy-rails-staging:
     docker:
       - image: circleci/ruby:2.5.3-stretch
     steps:
-      <<: *deploy-steps
+      - *deploy-steps
       - run: cd rails-example && gcloud app deploy --no-promote --version=staging
       - run: cd rails-example && bundle exec rake appengine:exec --version=staging -- bundle exec rake db:migrate
   deploy-rails-prod:
     docker:
       - image: circleci/ruby:2.5.3-stretch
     steps:
-      <<: *deploy-steps
+      - *deploy-steps
       - run: cd rails-example && gcloud app deploy
       - run: cd rails-example && bundle exec rake appengine:exec -- bundle exec rake db:migrate
 workflows:
