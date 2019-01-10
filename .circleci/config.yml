@@ -22,7 +22,7 @@ jobs:
           command: ./terraform/enable-audit-logs.sh
       - run:
           name: make sure jq is installed
-          command: apt-get install jq
+          command: apt-get install -y jq
       - run:
           name: Enable app to do schema migrations
           command: |
@@ -100,7 +100,7 @@ jobs:
       - run:
           name: prepare app engine config
           command: |
-            apt-get install jq
+            apt-get install -y jq
             export RAILS_SECRET=`jq -r .rails_secret < /tmp/workspace/tf-output.json`
             export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/workspace/tf-output.json`
             export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/workspace/tf-output.json`
