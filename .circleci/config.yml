@@ -104,7 +104,7 @@ jobs:
             export RAILS_SECRET=`jq -r .rails_secret < /tmp/workspace/tf-output.json`
             export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/workspace/tf-output.json`
             export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/workspace/tf-output.json`
-            export CONNECTION_NAME=`gcloud sql instances describe XXX --format=json | jq -r .connectionName`
+            export CONNECTION_NAME=`jq -r .postgres_instance < /tmp/workspace/tf-output.json`
             sed -i tmp "s/xSECRET_KEY_BASEx/${RAILS_SECRET}/" rails-example/app.yaml
             sed -i tmp "s/xCLOUDSQL_USERNAMEx/${CLOUDSQL_USERNAME}/" rails-example/app.yaml
             sed -i tmp "s/xCLOUDSQL_PASSWORDx/${CLOUDSQL_PASSWORD}/" rails-example/app.yaml
