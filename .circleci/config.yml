@@ -63,7 +63,7 @@ jobs:
   deploy-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
-    steps: &deploy-steps
+    steps:
       - checkout
       - run:
           name: "Pull Submodules"
@@ -110,31 +110,18 @@ jobs:
             sed -i tmp "s/xCLOUDSQL_PASSWORDx/${CLOUDSQL_PASSWORD}/" rails-example/app.yaml
             sed -i tmp "s/xCLOUDSQL_INSTANCEx/${CONNECTION_NAME}/" rails-example/app.yaml
       - run:
-          name: deploy to app engine
+          name: deploy to app engine and run db migrations
           command: |
             cd rails-example
             bundle exec bin/rails assets:precompile
-  deploy-rails-dev:
-    docker:
-      - image: circleci/ruby:2.5.3-stretch
-    steps:
-      - *deploy-steps
-      - run: cd rails-example && gcloud app deploy --no-promote --version=dev
-      - run: cd rails-example && bundle exec rake appengine:exec --version=dev -- bundle exec rake db:migrate
-  deploy-rails-staging:
-    docker:
-      - image: circleci/ruby:2.5.3-stretch
-    steps:
-      - *deploy-steps
-      - run: cd rails-example && gcloud app deploy --no-promote --version=staging
-      - run: cd rails-example && bundle exec rake appengine:exec --version=staging -- bundle exec rake db:migrate
-  deploy-rails-prod:
-    docker:
-      - image: circleci/ruby:2.5.3-stretch
-    steps:
-      - *deploy-steps
-      - run: cd rails-example && gcloud app deploy
-      - run: cd rails-example && bundle exec rake appengine:exec -- bundle exec rake db:migrate
+            if [ "$CIRCLE_BRANCH" = "master" ] ; then
+              gcloud app deploy
+              bundle exec rake appengine:exec -- bundle exec rake db:migrate
+            else
+              gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
+              bundle exec rake appengine:exec --version=${CIRCLE_BRANCH} -- bundle exec rake db:migrate
+            fi
+
 workflows:
   version: 2
   terraform:
@@ -150,23 +137,6 @@ workflows:
       - apply_terraform:
           requires:
             - hold_terraform
-      - deploy-rails-dev:
-          filters:
-            branches:
-              only:
-                - dev
-      - deploy-rails-staging:
-          filters:
-            branches:
-              only:
-                - master
-      - production_deploy_hold:
-          type: approval
-      - deploy-rails-prod:
+      - deploy-rails:
           requires:
-            - production_deploy_hold
-            - deploy-rails-staging
-          filters:
-            branches:
-              only:
-                - master
+            - apply_terraform
