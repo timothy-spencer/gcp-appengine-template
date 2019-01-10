@@ -60,10 +60,10 @@ jobs:
           root: /tmp/workspace
           paths:
             - tf-output.json
-  deploy-rails: &deploy-rails
+  deploy-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
-    steps:
+    steps: &deploy-steps
       - checkout
       - run:
           name: "Pull Submodules"
@@ -115,18 +115,24 @@ jobs:
             cd rails-example
             bundle exec bin/rails assets:precompile
   deploy-rails-dev:
-    <<: *deploy-rails
+    docker:
+      - image: circleci/ruby:2.5.3-stretch
     steps:
+      <<: *deploy-steps
       - run: cd rails-example && gcloud app deploy --no-promote --version=dev
       - run: cd rails-example && bundle exec rake appengine:exec --version=dev -- bundle exec rake db:migrate
   deploy-rails-staging:
-    <<: *deploy-rails
+    docker:
+      - image: circleci/ruby:2.5.3-stretch
     steps:
+      <<: *deploy-steps
       - run: cd rails-example && gcloud app deploy --no-promote --version=staging
       - run: cd rails-example && bundle exec rake appengine:exec --version=staging -- bundle exec rake db:migrate
   deploy-rails-prod:
-    <<: *deploy-rails
+    docker:
+      - image: circleci/ruby:2.5.3-stretch
     steps:
+      <<: *deploy-steps
       - run: cd rails-example && gcloud app deploy
       - run: cd rails-example && bundle exec rake appengine:exec -- bundle exec rake db:migrate
 workflows:
