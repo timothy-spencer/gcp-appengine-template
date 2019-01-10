@@ -32,6 +32,7 @@ Bootstrap Process
 1. Create a Terraform service account via
    `Console -> IAM & admin -> Service Accounts` in GCP
 1. Save the JSON credentials to `$HOME/gcloud-service-key.json`
+1. Add the `Project -> Owner` role to the terraform service account
 1. Enable circleci on this repo, then add some environment variables in circleci:
-   * GCLOUD_SERVICE_KEY:  Set this to the contents of `$HOME/gcloud-service-key.json`
-   * GOOGLE_PROJECT_ID: Set this to your google project ID
+  * GCLOUD_SERVICE_KEY:  Set this to the contents of `$HOME/gcloud-service-key.json`
+  * GOOGLE_PROJECT_ID: Set this to your google project ID
