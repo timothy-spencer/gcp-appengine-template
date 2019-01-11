@@ -112,7 +112,6 @@ jobs:
       - run:
           name: prepare app engine config
           command: |
-            apt-get install -y jq
             export RAILS_SECRET=`jq -r .rails_secret < /tmp/workspace/tf-output.json`
             export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/workspace/tf-output.json`
             export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/workspace/tf-output.json`
