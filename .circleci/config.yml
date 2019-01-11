@@ -75,7 +75,7 @@ jobs:
             gsutil cp /tmp/workspace/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
   test-rails:
     docker:
-      - image: circleci/ruby:2.5.3-stretch
+      - image: circleci/ruby:2.5.3-stretch-node
     steps:
       - checkout
       - run:
@@ -83,7 +83,7 @@ jobs:
           command: echo "not tested! XXX"
   deploy-rails:
     docker:
-      - image: circleci/ruby:2.5.3-stretch
+      - image: circleci/ruby:2.5.3-stretch-node
     steps:
       - checkout
       - run:
