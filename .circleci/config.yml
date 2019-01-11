@@ -143,13 +143,18 @@ jobs:
             cd rails-example
             bundle exec bin/rails assets:precompile
             if [ "$CIRCLE_BRANCH" = "master" ] ; then
-              gcloud app deploy --no-promote
+              mkdir /tmp/workspace
+              gcloud app deploy --no-promote | tee egrep '^target version:' | sed 's/.*\[\(.*\)\].*/\1/' > /tmp/workspace/master_target_version
               bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
               # XXX clean up old versions?
             else
               gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
               bundle exec rake appengine:exec --version=${CIRCLE_BRANCH} -- bundle exec rake db:create db:seed db:migrate
             fi
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - master_target_version
   promote-rails-prod:
     docker:
       - image: google/cloud-sdk
@@ -162,11 +167,13 @@ jobs:
           command: |
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Promote rails-example to production
           command: |
-            echo gcloud app services set-traffic default --splits XXXVERSION=1
-
+            export VERSION=`cat /tmp/workspace/master_target_version`
+            echo gcloud app services set-traffic default --splits ${VERSION}=1
 workflows:
   version: 2
   terraform:
