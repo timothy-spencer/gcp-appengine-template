@@ -60,6 +60,14 @@ jobs:
           root: /tmp/workspace
           paths:
             - tf-output.json
+  test-rails:
+    docker:
+      - image: circleci/ruby:2.5.3-stretch
+    steps:
+      - checkout
+      - run:
+          name: Run Tests!
+          command: echo "not tested! XXX"
   deploy-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
@@ -74,6 +82,12 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
             - v1-dependencies-
+      - run:
+          name: Configure Bundler
+          command: |
+            echo 'export BUNDLER_VERSION=$(cat Gemfile.lock | tail -1 | tr -d " ")' >> $BASH_ENV
+            source $BASH_ENV
+            gem install bundler
       - run:
           name: Install Ruby dependencies
           command: |
@@ -115,12 +129,29 @@ jobs:
             cd rails-example
             bundle exec bin/rails assets:precompile
             if [ "$CIRCLE_BRANCH" = "master" ] ; then
-              gcloud app deploy
+              gcloud app deploy --no-promote
               bundle exec rake appengine:exec -- bundle exec rake db:migrate
+              # XXX clean up old versions?
             else
               gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
               bundle exec rake appengine:exec --version=${CIRCLE_BRANCH} -- bundle exec rake db:migrate
             fi
+  promote-rails-prod:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - run:
+          name: Store Service Account key
+          command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
+      - run:
+          name: Setup Google Cloud SDK
+          command: |
+            gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+            gcloud config set project $GOOGLE_PROJECT_ID
+      - run:
+          name: Promote rails-example to production
+          command: |
+            echo gcloud app services set-traffic default --splits XXXVERSION=1
 
 workflows:
   version: 2
@@ -137,6 +168,20 @@ workflows:
       - apply_terraform:
           requires:
             - hold_terraform
-      - deploy-rails:
+  deploy-rails-example:
+    jobs:
+      - deploy-rails
+      - test-rails:
           requires:
-            - apply_terraform
+            - deploy-rails
+      - hold-rails-prod:
+          type: approval
+          requires:
+            - test-rails
+      - promote-rails-prod:
+          requires:
+            - hold-rails-prod
+          filters:
+            branches:
+              only:
+                - master
