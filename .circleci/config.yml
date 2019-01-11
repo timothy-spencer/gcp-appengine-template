@@ -83,16 +83,10 @@ jobs:
             - v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
             - v1-dependencies-
       - run:
-          name: Configure Bundler
-          command: |
-            cd rails-example
-            echo 'export BUNDLER_VERSION=$(cat Gemfile.lock | tail -1 | tr -d " ")' >> $BASH_ENV
-            source $BASH_ENV
-            gem install bundler
-      - run:
           name: Install Ruby dependencies
           command: |
             cd rails-example
+            BUNDLER_VERSION=$(cat Gemfile.lock | tail -1 | tr -d " ") gem install bundler
             bundle check || bundle install
       - save_cache:
           key: v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
