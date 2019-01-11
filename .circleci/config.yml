@@ -201,7 +201,7 @@ workflows:
             - apply_terraform
   deploy-rails-example:
     jobs:
-      - deploy-rails
+      - deploy-rails:
           filters:
             branches:
               only:
