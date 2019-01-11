@@ -55,7 +55,7 @@ jobs:
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             mkdir /tmp/workspace
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
-            terraform output > /tmp/workspace/tf-output.json
+            terraform output -json > /tmp/workspace/tf-output.json
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
