@@ -127,10 +127,16 @@ jobs:
             export CLOUDSQL_PASSWORD=`jq -r .postgres_password.value < /tmp/tf-output.json`
             export CONNECTION_NAME=`jq -r .postgres_instance.value < /tmp/tf-output.json`
             rm -f /tmp/tf-output.json
-            sed -i tmp "s/xSECRET_KEY_BASEx/${RAILS_SECRET}/" rails-example/app.yaml
-            sed -i tmp "s/xCLOUDSQL_USERNAMEx/${CLOUDSQL_USERNAME}/" rails-example/app.yaml
-            sed -i tmp "s/xCLOUDSQL_PASSWORDx/${CLOUDSQL_PASSWORD}/" rails-example/app.yaml
-            sed -i tmp "s/xCLOUDSQL_INSTANCEx/${CONNECTION_NAME}/" rails-example/app.yaml
+            cat <<EOF >> rails-example/app.yaml
+            env_variables:
+              SECRET_KEY_BASE: ${RAILS_SECRET}
+              CLOUDSQL_USERNAME: ${CLOUDSQL_USERNAME}
+              CLOUDSQL_PASSWORD: ${CLOUDSQL_PASSWORD}
+              CLOUDSQL_INSTANCE: ${CONNECTION_NAME}
+
+            beta_settings:
+              cloud_sql_instances: ${CONNECTION_NAME}
+            EOF
       - run:
           name: deploy to app engine and run db migrations
           command: |
