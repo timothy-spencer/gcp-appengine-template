@@ -67,7 +67,7 @@ jobs:
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
             terraform output > /tmp/tf-output.json
-            gsutil cp /tmp/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID
+            gsutil cp /tmp/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json
             rm -f /tmp/tf-output.json
   test-rails:
     docker:
@@ -117,11 +117,9 @@ jobs:
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
       - run:
-          name: get tf output for config
-          command: gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
-      - run:
           name: prepare app engine config
           command: |
+            gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
             export RAILS_SECRET=`jq -r .rails_secret < /tmp/tf-output.json`
             export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/tf-output.json`
             export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/tf-output.json`
