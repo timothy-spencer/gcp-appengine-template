@@ -126,6 +126,11 @@ jobs:
             export CLOUDSQL_USERNAME=`jq -r .postgres_username.value < /tmp/tf-output.json`
             export CLOUDSQL_PASSWORD=`jq -r .postgres_password.value < /tmp/tf-output.json`
             export CONNECTION_NAME=`jq -r .postgres_instance.value < /tmp/tf-output.json`
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              export RAILS_ENV=production
+            else
+              export RAILS_ENV=${CIRCLE_BRANCH}
+            fi
             rm -f /tmp/tf-output.json
             cat <<EOF >> rails-example/app.yaml
             env_variables:
@@ -133,6 +138,7 @@ jobs:
               CLOUDSQL_USERNAME: ${CLOUDSQL_USERNAME}
               CLOUDSQL_PASSWORD: ${CLOUDSQL_PASSWORD}
               CLOUDSQL_INSTANCE: ${CONNECTION_NAME}
+              RAILS_ENV: ${RAILS_ENV}
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
@@ -196,6 +202,15 @@ workflows:
   deploy-rails-example:
     jobs:
       - deploy-rails
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Only master gets deployed to production.  
+                # Add more branches here if you want them automatically deployed.
+                # Their RAILS_ENV will get set to the branch name.
+                - master
+                - staging
       - test-rails:
           requires:
             - deploy-rails
