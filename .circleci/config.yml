@@ -49,17 +49,14 @@ jobs:
       - run:
           name: Store Service Account
           command: echo $GCLOUD_SERVICE_KEY > ${HOME}/gcloud-service-key.json
-      - run: mkdir /tmp/workspace
       - run:
           name: Apply Terraform
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
-            terraform output > /tmp/workspace/tf-output.json
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - tf-output.json
+            terraform output > /tmp/tf-output.json
+            gsutil cp /tmp/tf-output.json gs://gcp-terraform-state-$GOOGLE_PROJECT_ID
+            rm -f /tmp/tf-output.json
   test-rails:
     docker:
       - image: circleci/ruby:2.5.3-stretch
@@ -107,15 +104,17 @@ jobs:
             gcloud config set project $GOOGLE_PROJECT_ID
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
-      - attach_workspace:
-          at: /tmp/workspace
+      - run:
+          name: get tf output for config
+          command: gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
       - run:
           name: prepare app engine config
           command: |
-            export RAILS_SECRET=`jq -r .rails_secret < /tmp/workspace/tf-output.json`
-            export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/workspace/tf-output.json`
-            export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/workspace/tf-output.json`
-            export CONNECTION_NAME=`jq -r .postgres_instance < /tmp/workspace/tf-output.json`
+            export RAILS_SECRET=`jq -r .rails_secret < /tmp/tf-output.json`
+            export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/tf-output.json`
+            export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/tf-output.json`
+            export CONNECTION_NAME=`jq -r .postgres_instance < /tmp/tf-output.json`
+            rm -f /tmp/tf-output.json
             sed -i tmp "s/xSECRET_KEY_BASEx/${RAILS_SECRET}/" rails-example/app.yaml
             sed -i tmp "s/xCLOUDSQL_USERNAMEx/${CLOUDSQL_USERNAME}/" rails-example/app.yaml
             sed -i tmp "s/xCLOUDSQL_PASSWORDx/${CLOUDSQL_PASSWORD}/" rails-example/app.yaml
