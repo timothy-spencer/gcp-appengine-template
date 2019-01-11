@@ -152,11 +152,14 @@ jobs:
               mkdir /tmp/workspace
               gcloud app deploy --no-promote 2>&1 | tee /tmp/deploy.out
               egrep '^target version:' /tmp/deploy.out | sed 's/.*\[\(.*\)\].*/\1/' > /tmp/workspace/master_target_version
-              bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
+              bundle exec rake appengine:exec -- bundle exec rake db:create
+              bundle exec rake appengine:exec -- bundle exec rake db:migrate
               # XXX clean up old versions?
             else
               gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
-              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:create db:seed db:migrate
+              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:create
+              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:seed
+              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:migrate
             fi
       - persist_to_workspace:
           root: /tmp/workspace
