@@ -144,7 +144,8 @@ jobs:
             bundle exec bin/rails assets:precompile
             if [ "$CIRCLE_BRANCH" = "master" ] ; then
               mkdir /tmp/workspace
-              gcloud app deploy --no-promote | tee egrep '^target version:' | sed 's/.*\[\(.*\)\].*/\1/' > /tmp/workspace/master_target_version
+              gcloud app deploy --no-promote 2>&1 | tee /tmp/deploy.out
+              egrep '^target version:' /tmp/deploy.out | sed 's/.*\[\(.*\)\].*/\1/' > /tmp/workspace/master_target_version
               bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
               # XXX clean up old versions?
             else
