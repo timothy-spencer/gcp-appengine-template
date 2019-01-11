@@ -122,10 +122,10 @@ jobs:
           name: prepare app engine config
           command: |
             gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
-            export RAILS_SECRET=`jq -r .rails_secret < /tmp/tf-output.json`
-            export CLOUDSQL_USERNAME=`jq -r .postgres_username < /tmp/tf-output.json`
-            export CLOUDSQL_PASSWORD=`jq -r .postgres_password < /tmp/tf-output.json`
-            export CONNECTION_NAME=`jq -r .postgres_instance < /tmp/tf-output.json`
+            export RAILS_SECRET=`jq -r .rails_secret.value < /tmp/tf-output.json`
+            export CLOUDSQL_USERNAME=`jq -r .postgres_username.value < /tmp/tf-output.json`
+            export CLOUDSQL_PASSWORD=`jq -r .postgres_password.value < /tmp/tf-output.json`
+            export CONNECTION_NAME=`jq -r .postgres_instance.value < /tmp/tf-output.json`
             rm -f /tmp/tf-output.json
             sed -i tmp "s/xSECRET_KEY_BASEx/${RAILS_SECRET}/" rails-example/app.yaml
             sed -i tmp "s/xCLOUDSQL_USERNAMEx/${CLOUDSQL_USERNAME}/" rails-example/app.yaml
