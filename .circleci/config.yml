@@ -158,7 +158,7 @@ jobs:
             else
               gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
               bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:create
-              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:seed
+              # bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:seed
               bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:migrate
             fi
       - persist_to_workspace:
