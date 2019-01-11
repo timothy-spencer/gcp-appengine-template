@@ -144,11 +144,11 @@ jobs:
             bundle exec bin/rails assets:precompile
             if [ "$CIRCLE_BRANCH" = "master" ] ; then
               gcloud app deploy --no-promote
-              bundle exec rake appengine:exec -- bundle exec rake db:migrate
+              bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
               # XXX clean up old versions?
             else
               gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
-              bundle exec rake appengine:exec --version=${CIRCLE_BRANCH} -- bundle exec rake db:migrate
+              bundle exec rake appengine:exec --version=${CIRCLE_BRANCH} -- bundle exec rake db:create db:seed db:migrate
             fi
   promote-rails-prod:
     docker:
