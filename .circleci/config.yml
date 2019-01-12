@@ -181,7 +181,7 @@ jobs:
           name: Promote rails-example to production
           command: |
             export VERSION=`cat /tmp/workspace/master_target_version`
-            echo gcloud app services set-traffic default --splits ${VERSION}=1
+            gcloud app services set-traffic default --splits ${VERSION}=1
 workflows:
   version: 2
   terraform:
