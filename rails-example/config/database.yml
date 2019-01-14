@@ -33,3 +33,7 @@ staging: &realdb
 production:
   <<: *realdb
   database: "production"
+
+dev:
+  <<: *realdb
+  database: "dev"

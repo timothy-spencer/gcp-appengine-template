@@ -121,16 +121,16 @@ jobs:
       - run:
           name: prepare app engine config
           command: |
-            gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
-            export RAILS_SECRET=`jq -r .rails_secret.value < /tmp/tf-output.json`
-            export CLOUDSQL_USERNAME=`jq -r .postgres_username.value < /tmp/tf-output.json`
-            export CLOUDSQL_PASSWORD=`jq -r .postgres_password.value < /tmp/tf-output.json`
-            export CONNECTION_NAME=`jq -r .postgres_instance.value < /tmp/tf-output.json`
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export RAILS_ENV=production
             else
               export RAILS_ENV=${CIRCLE_BRANCH}
             fi
+            gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
+            export RAILS_SECRET=`jq -r .rails_secret_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CLOUDSQL_USERNAME=`jq -r .postgres_username_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CLOUDSQL_PASSWORD=`jq -r .postgres_password_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CONNECTION_NAME=`jq -r .postgres_instance_${RAILS_ENV}.value < /tmp/tf-output.json`
             rm -f /tmp/tf-output.json
             cat <<EOF >> rails-example/app.yaml
             env_variables:
@@ -212,6 +212,7 @@ workflows:
                 # Their RAILS_ENV will get set to the branch name.
                 - master
                 - staging
+                - dev
       - test-rails:
           requires:
             - deploy-rails

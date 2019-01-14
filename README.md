@@ -16,7 +16,7 @@ prior to changing production.
 
 Rails / App Engine
 =============================
-To test locally run `cd rails-example && bin/rails server`.
+To test locally run `cd rails-example && bundle install && bin/rails server`.
 
 .NET Core / App Engine
 ======================
@@ -32,7 +32,8 @@ Bootstrap Process
 1. Create a Terraform service account via
    `Console -> IAM & admin -> Service Accounts` in GCP
 1. Save the JSON credentials to `$HOME/gcloud-service-key.json`
-1. Add the `Project -> Owner` role to the terraform service account
+1. Go to `Console -> IAM & admin` in GCP, click on `View by: Roles`,
+   and then add `Project -> Owner` to the terraform service account.
 1. Enable circleci on this repo, then add some environment variables in circleci:
-  * GCLOUD_SERVICE_KEY:  Set this to the contents of `$HOME/gcloud-service-key.json`
-  * GOOGLE_PROJECT_ID: Set this to your google project ID
+   * GCLOUD_SERVICE_KEY:  Set this to the contents of `$HOME/gcloud-service-key.json`
+   * GOOGLE_PROJECT_ID: Set this to your google project ID
