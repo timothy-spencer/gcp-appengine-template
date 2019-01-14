@@ -39,6 +39,8 @@ Bootstrap Process
    * GOOGLE_PROJECT_ID: Set this to your google project ID
    * BASICAUTH_PASSWORD: Set this to a basic auth password to frontend your app with.
      If it is not set, then your app will be public.
+   * BASICAUTH_USER: Set this to the basic auth username you want.
+
 
 You should be sure to set up master and staging branches as protected branches
 that require approval for PRs to land in your repo.
