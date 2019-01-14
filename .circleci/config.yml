@@ -54,15 +54,8 @@ jobs:
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             mkdir /tmp/workspace
-            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
-              cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
-              terraform output -json > /tmp/workspace/tf-output.json
-            else
-              # We made it this way because we didn't want people to just hit submit on
-              # staging or dev changes and have it affect production.  If this is a problem,
-              # we may just make multiple terraform configs for each environment.
-              echo "only apply terraform on changes to the master branch"
-            fi
+            cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
+            terraform output -json > /tmp/workspace/tf-output.json
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
