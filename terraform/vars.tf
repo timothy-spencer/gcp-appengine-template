@@ -13,7 +13,7 @@ resource "random_string" "rails_secret_production" {
 }
 
 output "rails_secret_production" {
-  value = "${random_string.rails_secret.result}"
+  value = "${random_string.rails_secret_production.result}"
   description = "Rails secret string"
 }
 
