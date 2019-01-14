@@ -3,10 +3,10 @@ resource "google_sql_database_instance" "rails-example-production" {
   name = "rails-production"
   database_version = "POSTGRES_9_6"
   region = "${var.region}"
-  availability_type = "REGIONAL"
 
   settings {
     tier = "db-f1-micro"
+    availability_type = "REGIONAL"
   }
 }
 
