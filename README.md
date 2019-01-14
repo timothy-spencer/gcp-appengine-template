@@ -37,3 +37,5 @@ Bootstrap Process
 1. Enable circleci on this repo, then add some environment variables in circleci:
    * GCLOUD_SERVICE_KEY:  Set this to the contents of `$HOME/gcloud-service-key.json`
    * GOOGLE_PROJECT_ID: Set this to your google project ID
+   * BASICAUTH_PASSWORD: Set this to a basic auth password to frontend your app with.
+     If it is not set, then your app will be public.
