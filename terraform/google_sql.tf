@@ -72,3 +72,40 @@ output "postgres_instance_dev" {
   value = "${google_sql_database_instance.rails-example-dev.connection_name}"
   description = "Postgres dev instance ID"
 }
+
+// Staging Postgres Database
+resource "google_sql_database_instance" "rails-example-staging" {
+  name = "rails-staging"
+  database_version = "POSTGRES_9_6"
+  region = "${var.region}"
+
+  settings {
+    tier = "db-f1-micro"
+  }
+}
+
+resource "random_string" "postgres_password_staging" {
+  length  = 16
+  special = true
+}
+
+resource "google_sql_user" "postgres-staging" {
+  name     = "postgres"
+  password = "${random_string.postgres_password_staging.result}"
+  instance = "${google_sql_database_instance.rails-example-staging.name}"
+}
+
+output "postgres_password_staging" {
+  value = "${random_string.postgres_password_staging.result}"
+  description = "Postgres staging password"
+}
+
+output "postgres_username_staging" {
+  value = "${google_sql_user.postgres-staging.name}"
+  description = "Postgres staging username"
+}
+
+output "postgres_instance_staging" {
+  value = "${google_sql_database_instance.rails-example-staging.connection_name}"
+  description = "Postgres staging instance ID"
+}

@@ -39,3 +39,28 @@ Bootstrap Process
    * GOOGLE_PROJECT_ID: Set this to your google project ID
    * BASICAUTH_PASSWORD: Set this to a basic auth password to frontend your app with.
      If it is not set, then your app will be public.
+
+Normal Operation Workflows
+==========================
+
+The normal way that development for an app happens is:
+  * You develop locally, pushing changes up to your own feature/fix branch in github.
+  * Once you have something that is tested and worthy of going out, you can PR 
+    it into the dev branch, where it will be automatically deployed to the dev version
+    of the app in gcp and have it's tests run against it.
+  * When you have your changes in a releasable form, your changes should be PR'ed
+    into the staging branch, where they will be approved by another person, and then
+    they will automatically be rolled out into the staging version of the app in GCP.
+  * After staging has been validated, your changes should be PR'ed into the
+    master branch and approved by somebody else, where they will be automatically
+    rolled out into production.
+
+Things to note:
+  * The deploy will run db migrations before doing the promotion to production, so
+    make sure that your old version of the app is forward-compatible one release, or
+    you might have problems.
+  * Infrastructure updates that get rolled out by terraform currently only are applied
+    when they are on the master branch and are manually approved in circleci.  Before
+    doing such an approval, you should check the terraform plan output to see what is
+    changed, in case your change actually does something that you did not expect, like
+    delete resources instead of rename them.
