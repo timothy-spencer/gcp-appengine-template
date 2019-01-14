@@ -54,8 +54,15 @@ jobs:
           command: |
             export TF_VAR_project_id=$GOOGLE_PROJECT_ID
             mkdir /tmp/workspace
-            cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
-            terraform output -json > /tmp/workspace/tf-output.json
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              cd terraform && terraform init -backend-config="bucket=gcp-terraform-state-$GOOGLE_PROJECT_ID" && terraform apply -input=false -auto-approve
+              terraform output -json > /tmp/workspace/tf-output.json
+            else
+              # We made it this way because we didn't want people to just hit submit on
+              # staging or dev changes and have it affect production.  If this is a problem,
+              # we may just make multiple terraform configs for each environment.
+              echo "only apply terraform on changes to the master branch"
+            fi
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -121,11 +128,16 @@ jobs:
       - run:
           name: prepare app engine config
           command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ] ; then
+              export RAILS_ENV=production
+            else
+              export RAILS_ENV=${CIRCLE_BRANCH}
+            fi
             gsutil cp gs://gcp-terraform-state-$GOOGLE_PROJECT_ID/tf-output.json /tmp/tf-output.json
-            export RAILS_SECRET=`jq -r .rails_secret.value < /tmp/tf-output.json`
-            export CLOUDSQL_USERNAME=`jq -r .postgres_username.value < /tmp/tf-output.json`
-            export CLOUDSQL_PASSWORD=`jq -r .postgres_password.value < /tmp/tf-output.json`
-            export CONNECTION_NAME=`jq -r .postgres_instance.value < /tmp/tf-output.json`
+            export RAILS_SECRET=`jq -r .rails_secret_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CLOUDSQL_USERNAME=`jq -r .postgres_username_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CLOUDSQL_PASSWORD=`jq -r .postgres_password_${RAILS_ENV}.value < /tmp/tf-output.json`
+            export CONNECTION_NAME=`jq -r .postgres_instance_${RAILS_ENV}.value < /tmp/tf-output.json`
             rm -f /tmp/tf-output.json
             cat <<EOF >> rails-example/app.yaml
             env_variables:
@@ -133,6 +145,7 @@ jobs:
               CLOUDSQL_USERNAME: ${CLOUDSQL_USERNAME}
               CLOUDSQL_PASSWORD: ${CLOUDSQL_PASSWORD}
               CLOUDSQL_INSTANCE: ${CONNECTION_NAME}
+              RAILS_ENV: ${RAILS_ENV}
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
@@ -140,16 +153,23 @@ jobs:
       - run:
           name: deploy to app engine and run db migrations
           command: |
+            mkdir /tmp/workspace
             cd rails-example
             bundle exec bin/rails assets:precompile
             if [ "$CIRCLE_BRANCH" = "master" ] ; then
-              gcloud app deploy --no-promote
+              gcloud app deploy --no-promote 2>&1 | tee /tmp/deploy.out
+              egrep '^target version:' /tmp/deploy.out | sed 's/.*\[\(.*\)\].*/\1/' > /tmp/workspace/master_target_version
               bundle exec rake appengine:exec -- bundle exec rake db:create db:migrate
               # XXX clean up old versions?
             else
               gcloud app deploy --no-promote --version=${CIRCLE_BRANCH}
-              bundle exec rake appengine:exec --version=${CIRCLE_BRANCH} -- bundle exec rake db:create db:seed db:migrate
+              bundle exec rake appengine:exec GAE_VERSION=${CIRCLE_BRANCH} -- bundle exec rake db:create db:migrate
+              touch /tmp/workspace/master_target_version
             fi
+      - persist_to_workspace:
+          root: /tmp/workspace
+          paths:
+            - master_target_version
   promote-rails-prod:
     docker:
       - image: google/cloud-sdk
@@ -162,11 +182,13 @@ jobs:
           command: |
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
+      - attach_workspace:
+          at: /tmp/workspace
       - run:
           name: Promote rails-example to production
           command: |
-            echo gcloud app services set-traffic default --splits XXXVERSION=1
-
+            export VERSION=`cat /tmp/workspace/master_target_version`
+            gcloud app services set-traffic default --splits ${VERSION}=1
 workflows:
   version: 2
   terraform:
@@ -187,17 +209,23 @@ workflows:
             - apply_terraform
   deploy-rails-example:
     jobs:
-      - deploy-rails
+      - deploy-rails:
+          filters:
+            branches:
+              only:
+                # This is the list of branches which will be deployed automatically.
+                # Only master gets deployed to production.  
+                # Add more branches here if you want them automatically deployed.
+                # Their RAILS_ENV will get set to the branch name.
+                - master
+                - staging
+                - dev
       - test-rails:
           requires:
             - deploy-rails
-      - hold-rails-prod:
-          type: approval
-          requires:
-            - test-rails
       - promote-rails-prod:
           requires:
-            - hold-rails-prod
+            - test-rails
           filters:
             branches:
               only:

@@ -20,12 +20,20 @@ test:
   <<: *default
   database: db/test.sqlite3
 
-production:
+staging: &realdb
   adapter: postgresql
   encoding: unicode
   pool: 5
   timeout: 5000
   username: <%= ENV.fetch("CLOUDSQL_USERNAME") {'username'} %>
   password: <%= ENV.fetch("CLOUDSQL_PASSWORD") {'password'} %>
-  database: "production"
+  database: "staging"
   host:   "/cloudsql/<%= ENV.fetch('CLOUDSQL_INSTANCE') {'instancename'} %>"
+
+production:
+  <<: *realdb
+  database: "production"
+
+dev:
+  <<: *realdb
+  database: "dev"
