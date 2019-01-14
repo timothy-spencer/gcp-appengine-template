@@ -1,6 +1,6 @@
 // Production/staging Postgres Database
 resource "google_sql_database_instance" "rails-example-production" {
-  name = "rails-example-production"
+  name = "rails-production"
   database_version = "POSTGRES_9_6"
   region = "${var.region}"
 
@@ -38,7 +38,7 @@ output "postgres_instance_production" {
 
 // Dev Postgres Database
 resource "google_sql_database_instance" "rails-example-dev" {
-  name = "rails-example-dev"
+  name = "rails-dev"
   database_version = "POSTGRES_9_6"
   region = "${var.region}"
 
