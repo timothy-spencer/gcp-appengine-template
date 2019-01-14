@@ -139,6 +139,7 @@ jobs:
               CLOUDSQL_PASSWORD: ${CLOUDSQL_PASSWORD}
               CLOUDSQL_INSTANCE: ${CONNECTION_NAME}
               RAILS_ENV: ${RAILS_ENV}
+              BASICAUTH_PASSWORD: ${BASICAUTH_PASSWORD}
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
