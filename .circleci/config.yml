@@ -190,7 +190,7 @@ jobs:
           command: echo "not tested! XXX"
   deploy-dotnet:
     docker:
-      - image: google-appengine/aspnetcore:2.1.0
+      - image: gcr.io/google-appengine/aspnetcore:2.1.0
     steps:
       - checkout
       - run:
