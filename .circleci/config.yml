@@ -239,11 +239,11 @@ jobs:
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}=tcp:5432
             EOF
-            echo '{}' > CloudSQL.deps.json
       - run:
           name: build and deploy to app engine
           command: |
             cd dotnet-docs-samples/appengine/flexible/CloudSql
+            echo '{}' > CloudSQL.deps.json
             dotnet publish -c Release
             gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} ./bin/Release/netcoreapp2.1/publish/app.yaml
             # XXX db migrations?
