@@ -207,6 +207,7 @@ jobs:
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
             export PATH=~/google-cloud-sdk/bin:$PATH
+            apt install -y python python-dev python3 python3-dev python-pip
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
@@ -248,45 +249,45 @@ jobs:
 
 workflows:
   version: 2
-  terraform:
-    jobs:
-      - enable_apis
-      - plan_terraform:
-          requires: 
-            - enable_apis
-      - hold_terraform:
-          type: approval
-          requires:
-            - plan_terraform
-      - apply_terraform:
-          requires:
-            - hold_terraform
-      - store_tf_output:
-          requires:
-            - apply_terraform
-  deploy-rails-example:
-    jobs:
-      - deploy-rails:
-          filters:
-            branches:
-              only:
-                # This is the list of branches which will be deployed automatically.
-                # Only master gets deployed to production.  
-                # Add more branches here if you want them automatically deployed.
-                # Their RAILS_ENV will get set to the branch name.
-                - master
-                - staging
-                - dev
-      - test-rails:
-          requires:
-            - deploy-rails
-      - promote-rails-prod:
-          requires:
-            - test-rails
-          filters:
-            branches:
-              only:
-                - master
+  # terraform:
+  #   jobs:
+  #     - enable_apis
+  #     - plan_terraform:
+  #         requires: 
+  #           - enable_apis
+  #     - hold_terraform:
+  #         type: approval
+  #         requires:
+  #           - plan_terraform
+  #     - apply_terraform:
+  #         requires:
+  #           - hold_terraform
+  #     - store_tf_output:
+  #         requires:
+  #           - apply_terraform
+  # deploy-rails-example:
+  #   jobs:
+  #     - deploy-rails:
+  #         filters:
+  #           branches:
+  #             only:
+  #               # This is the list of branches which will be deployed automatically.
+  #               # Only master gets deployed to production.  
+  #               # Add more branches here if you want them automatically deployed.
+  #               # Their RAILS_ENV will get set to the branch name.
+  #               - master
+  #               - staging
+  #               - dev
+  #     - test-rails:
+  #         requires:
+  #           - deploy-rails
+  #     - promote-rails-prod:
+  #         requires:
+  #           - test-rails
+  #         filters:
+  #           branches:
+  #             only:
+  #               - master
   deploy-dotnet-example:
     jobs:
       - deploy-dotnet:
