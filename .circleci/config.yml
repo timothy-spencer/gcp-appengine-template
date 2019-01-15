@@ -207,6 +207,7 @@ jobs:
             tar xzf gcloud-sdk.tar.gz -C ~
             rm gcloud-sdk.tar.gz
             export PATH=~/google-cloud-sdk/bin:$PATH
+            apt-get update
             apt install -y python python-dev python3 python3-dev python-pip
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
