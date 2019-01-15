@@ -100,7 +100,7 @@ jobs:
           command: |
             cd rails-example
             BUNDLER_VERSION=$(cat Gemfile.lock | tail -1 | tr -d " ") gem install bundler
-            bundle check || bundle install
+            bundle check || bundle install --deployment
       - save_cache:
           key: v1-dependencies-{{ checksum "rails-example/Gemfile.lock" }}
           paths:
