@@ -192,13 +192,9 @@ workflows:
       - plan_terraform:
           requires: 
             - enable_apis
-      - hold_terraform:
-          type: approval
-          requires:
-            - plan_terraform
       - apply_terraform:
           requires:
-            - hold_terraform
+            - plan_terraform
       - store_tf_output:
           requires:
             - apply_terraform
