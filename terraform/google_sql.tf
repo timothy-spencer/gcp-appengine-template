@@ -1,6 +1,6 @@
-// Production/staging Postgres Database
-resource "google_sql_database_instance" "rails-example-production" {
-  name = "rails-production"
+// Production Postgres Database
+resource "google_sql_database_instance" "production" {
+  name = "production"
   database_version = "POSTGRES_9_6"
   region = "${var.region}"
 
@@ -18,7 +18,7 @@ resource "random_string" "postgres_password_production" {
 resource "google_sql_user" "postgres-production" {
   name     = "postgres"
   password = "${random_string.postgres_password_production.result}"
-  instance = "${google_sql_database_instance.rails-example-production.name}"
+  instance = "${google_sql_database_instance.production.name}"
 }
 
 output "postgres_password_production" {
@@ -32,14 +32,14 @@ output "postgres_username_production" {
 }
 
 output "postgres_instance_production" {
-  value = "${google_sql_database_instance.rails-example-production.connection_name}"
+  value = "${google_sql_database_instance.production.connection_name}"
   description = "Postgres production instance ID"
 }
 
 
 // Dev Postgres Database
-resource "google_sql_database_instance" "rails-example-dev" {
-  name = "rails-dev"
+resource "google_sql_database_instance" "dev" {
+  name = "dev"
   database_version = "POSTGRES_9_6"
   region = "${var.region}"
 
@@ -56,7 +56,7 @@ resource "random_string" "postgres_password_dev" {
 resource "google_sql_user" "postgres-dev" {
   name     = "postgres"
   password = "${random_string.postgres_password_dev.result}"
-  instance = "${google_sql_database_instance.rails-example-dev.name}"
+  instance = "${google_sql_database_instance.dev.name}"
 }
 
 output "postgres_password_dev" {
@@ -70,13 +70,13 @@ output "postgres_username_dev" {
 }
 
 output "postgres_instance_dev" {
-  value = "${google_sql_database_instance.rails-example-dev.connection_name}"
+  value = "${google_sql_database_instance.dev.connection_name}"
   description = "Postgres dev instance ID"
 }
 
 // Staging Postgres Database
-resource "google_sql_database_instance" "rails-example-staging" {
-  name = "rails-staging"
+resource "google_sql_database_instance" "staging" {
+  name = "staging"
   database_version = "POSTGRES_9_6"
   region = "${var.region}"
 
@@ -93,7 +93,7 @@ resource "random_string" "postgres_password_staging" {
 resource "google_sql_user" "postgres-staging" {
   name     = "postgres"
   password = "${random_string.postgres_password_staging.result}"
-  instance = "${google_sql_database_instance.rails-example-staging.name}"
+  instance = "${google_sql_database_instance.staging.name}"
 }
 
 output "postgres_password_staging" {
@@ -107,6 +107,6 @@ output "postgres_username_staging" {
 }
 
 output "postgres_instance_staging" {
-  value = "${google_sql_database_instance.rails-example-staging.connection_name}"
+  value = "${google_sql_database_instance.staging.connection_name}"
   description = "Postgres staging instance ID"
 }

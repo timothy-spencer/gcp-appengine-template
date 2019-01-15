@@ -27,13 +27,13 @@ staging: &realdb
   timeout: 5000
   username: <%= ENV.fetch("CLOUDSQL_USERNAME") {'username'} %>
   password: <%= ENV.fetch("CLOUDSQL_PASSWORD") {'password'} %>
-  database: "staging"
+  database: "rails-staging"
   host:   "/cloudsql/<%= ENV.fetch('CLOUDSQL_INSTANCE') {'instancename'} %>"
 
 production:
   <<: *realdb
-  database: "production"
+  database: "rails-production"
 
 dev:
   <<: *realdb
-  database: "dev"
+  database: "rails-dev"

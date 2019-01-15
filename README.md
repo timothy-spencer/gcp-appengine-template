@@ -1,12 +1,12 @@
 GCP App Engine template
 =======================
 This repository contains a sample application and supporting configuration files
-for Google App Engine Standard to be tested and evaluated.
+for Google App Engine to be tested and evaluated.
 
 Terraform
 =========
-Terraform orchestrates the project setup, creating databases, source repo,
-storage and kms.
+Terraform orchestrates the project setup, creating databases, storage,
+secrets, etc.
 
 Circle CI
 =========
@@ -50,9 +50,9 @@ Normal Operation Workflows
 
 The normal way that development for an app happens is:
   * You develop locally, pushing changes up to your own feature/fix branch in github.
-  * Once you have something that is tested and worthy of going out, you can PR 
-    it into the dev branch, where it will be automatically deployed to the dev version
-    of the app in gcp and have it's tests run against it.
+  * Once you have something that is tested and worthy of going out, you can Pull Request
+    (PR) it into the dev branch, where it will be automatically deployed to the dev
+    version of the app in gcp and have it's tests run against it.
   * When you have your changes in a releasable form, your changes should be PR'ed
     into the staging branch, where they will be approved by another person, and then
     they will automatically be rolled out into the staging version of the app in GCP.
@@ -71,3 +71,6 @@ Things to note:
     changed, in case your change actually does something that you did not expect, like
     delete resources instead of rename them.  Be careful!  This applies to _all_
     infrastructure, production/staging/dev/etc.
+  * These example apps all use the same username/password for each of the dev/staging/prod
+  	databases.  In real life, you'd create separate username/passwords for each database
+  	that you create, so that the apps in prod can't query each others' databases.
