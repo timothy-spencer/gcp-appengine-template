@@ -236,7 +236,7 @@ jobs:
           name: deploy to app engine
           command: |
             cd dotnet-docs-samples/appengine/flexible/CloudSql
-            touch CloudSQL.deps.json
+            echo '{}' > CloudSQL.deps.json
             gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH}
             # XXX db migrations?
 
