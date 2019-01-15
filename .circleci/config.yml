@@ -236,7 +236,7 @@ jobs:
           name: deploy to app engine
           command: |
             cd dotnet-docs-samples/appengine/flexible/CloudSql
-            gcloud app deploy --no-promote --version=dotnet-${DEPLOY_ENV}
+            gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH}
             # XXX db migrations?
 
 workflows:
