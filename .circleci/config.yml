@@ -193,11 +193,6 @@ jobs:
       - image: gcr.io/google-appengine/aspnetcore:2.1.0
     steps:
       - checkout
-      # - run:
-      #     name: "Pull Submodules"
-      #     command: |
-      #       git submodule init
-      #       git submodule update --remote
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -208,11 +203,16 @@ jobs:
             rm gcloud-sdk.tar.gz
             export PATH=~/google-cloud-sdk/bin:$PATH
             apt-get update
-            apt install -y python python-dev python3 python3-dev python-pip
+            apt install -y python python-dev python3 python3-dev python-pip git
             gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
             gcloud config set project $GOOGLE_PROJECT_ID
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
+      - run:
+          name: "Pull Submodules"
+          command: |
+            git submodule init
+            git submodule update --remote
       - run:
           name: prepare app engine config
           command: |
