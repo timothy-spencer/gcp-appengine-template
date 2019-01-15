@@ -190,7 +190,7 @@ jobs:
           command: echo "not tested! XXX"
   deploy-dotnet:
     docker:
-      - image: google/cloud-sdk
+      - image: google-appengine/aspnetcore:2.1.0
     steps:
       - checkout
       - run:
@@ -237,7 +237,8 @@ jobs:
           command: |
             cd dotnet-docs-samples/appengine/flexible/CloudSql
             echo '{}' > CloudSQL.deps.json
-            gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH}
+            dotnet publish -c Release
+            gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} bin/release/netcoreapp2.1/publish/app.yaml
             # XXX db migrations?
 
 workflows:
