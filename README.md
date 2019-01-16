@@ -16,11 +16,18 @@ prior to changing production.
 
 Rails / App Engine
 =============================
-To test locally run `cd rails-example && bundle install && bin/rails server`.
+This is a simple app that uses ActiveRecord to store a "blog" in a db.
+
+To test locally, run `cd rails-example && bundle install && bin/rails server`.
 
 .NET Core / App Engine
 ======================
-XXX
+This is an example app from the google cloud platform which keeps track of accesses
+of the app in a db.
+
+To test locally, `cd dotnet-docs-samples/appengine/flexible/CloudSql && dotnet run`.
+You will have to get a database running on your local machine and configure the app
+to use it in `dotnet-docs-samples/appengine/flexible/CloudSql/appsettings.json`
 
 Java Spring Boot / App Engine
 =============================
