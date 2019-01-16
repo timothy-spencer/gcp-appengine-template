@@ -249,12 +249,16 @@ jobs:
               }
             }
             EOF
+            echo '{}' > CloudSql.deps.json
 
-            echo '{}' > CloudSQL.deps.json
+            # make sure database exists
+            gcloud sql databases create dotnet-${DEPLOY_ENV}-visitors --instance ${DEPLOY_ENV} || true
 
+            # deploy!
             dotnet publish -c Release
             gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} ./bin/Release/netcoreapp2.1/publish/app.yaml
-            # XXX db migrations?
+
+            # If there were any migrations, they would happen here
 
 workflows:
   version: 2
