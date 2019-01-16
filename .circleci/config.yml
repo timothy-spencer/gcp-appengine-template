@@ -242,7 +242,7 @@ jobs:
 
             # deploy!
             dotnet publish -c Release
-            gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} ./bin/Release/netcoreapp2.1/publish/app.yaml
+            gcloud app deploy --no-promote --version=dotnet-${CIRCLE_BRANCH} ./app.yaml
 
             # If there were any migrations, they would happen here
 
