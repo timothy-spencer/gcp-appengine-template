@@ -209,14 +209,9 @@ jobs:
             echo 'export PATH=~/google-cloud-sdk/bin:$PATH' >> $BASH_ENV
             source $BASH_ENV
       - run:
-          name: "Pull Submodules"
-          command: |
-            git submodule init
-            git submodule update --remote
-      - run:
           name: prepare app engine config, build, deploy
           command: |
-            cd dotnet-docs-samples/appengine/flexible/CloudSql
+            cd dotnet-example
 
             if [ "${CIRCLE_BRANCH}" = "master" ] ; then
               export DEPLOY_ENV=production
@@ -236,20 +231,11 @@ jobs:
 
             env_variables:
               ASPNETCORE_DEPLOY_ENV: ${DEPLOY_ENV}
+              ASPNETCORE_ConnectionString: Uid=${CLOUDSQL_USERNAME};Pwd=${CLOUDSQL_PASSWORD};Host=cloudsql;Database=dotnet-${DEPLOY_ENV}-visitors
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}=tcp:5432
             EOF
-
-            cat <<EOF > appsettings.json
-            {
-              "CloudSQL" : {
-                "Database" : "PostgreSQL",
-                "ConnectionString": "Uid=${CLOUDSQL_USERNAME};Pwd=${CLOUDSQL_PASSWORD};Host=cloudsql;Database=dotnet-${DEPLOY_ENV}-visitors"
-              }
-            }
-            EOF
-            echo '{}' > CloudSql.deps.json
 
             # make sure database exists
             gcloud sql databases create dotnet-${DEPLOY_ENV}-visitors --instance ${DEPLOY_ENV} || true
