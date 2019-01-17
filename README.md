@@ -23,11 +23,12 @@ To test locally, run `cd rails-example && bundle install && bin/rails server`.
 .NET Core / App Engine
 ======================
 This is an example app from the google cloud platform which keeps track of accesses
-of the app in a db.
+of the app in a db.  This may change, but for now, you must use the netcoreapp2.1
+framework for applications deployed into App Engine.
 
-To test locally, `cd dotnet-docs-samples/appengine/flexible/CloudSql && dotnet run`.
+To test locally, `cd dotnet-example && dotnet run`.
 You will have to get a database running on your local machine and configure the app
-to use it in `dotnet-docs-samples/appengine/flexible/CloudSql/appsettings.json`
+to use it in `dotnet-example/appsettings.json`.
 
 Java Spring Boot / App Engine
 =============================
