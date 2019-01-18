@@ -26,7 +26,7 @@ This is an example app from the google cloud platform which keeps track of acces
 of the app in a db.  This may change, but for now, you must use the netcoreapp2.1
 framework for applications deployed into App Engine.
 
-To test locally, `cd dotnet-example && dotnet ef database update && dotnet run`.
+To test locally, `cd dotnet-example && dotnet run`.
 This will operate on a local `blogging.db` sqlite db.
 
 Java Spring Boot / App Engine

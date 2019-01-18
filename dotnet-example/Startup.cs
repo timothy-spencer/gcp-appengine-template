@@ -77,6 +77,8 @@ namespace dotnet_example
                 app.UseHsts();
             }
 
+            UpdateDatabase(app);
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
@@ -87,6 +89,19 @@ namespace dotnet_example
                     name: "default",
                     template: "{controller=Blogs}/{action=Index}/{id?}");
             });
+        }
+
+        private static void UpdateDatabase(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<BloggingContext>())
+                {
+                    context.Database.Migrate();
+                }
+            }
         }
     }
 }
