@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "dotnet-example";
+}
+@model dotnet_example.PostgreSQL.VisitorContext
+
+<H2>Visitor Log</H2>
+<table>
+    <thead><tr><td>Time Stamp<td>Ip Address</tr></thead>
+    <tbody>
+    @foreach (dotnet_example.PostgreSQL.VisitorLogEntry entry in Model.Visitors) {
+        <tr><td>@entry.TimeStamp<td>@entry.IpAddress</tr>
+    }
+    </tbody>
+</table>
