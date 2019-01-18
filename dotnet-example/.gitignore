@@ -32,3 +32,10 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+
+# Use this to pin what SDK to use while doing dev
+global.json
+
+# Don't get the sqlite db
+blogging.db
+

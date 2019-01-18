@@ -1,20 +1,39 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using System;
+using Microsoft.EntityFrameworkCore;
 
-namespace dotnet_example.PostgreSQL
+namespace dotnet_example.Models
 {
-    public class VisitorContext : DbContext
+    public class BloggingContext : DbContext
     {
-        public DbSet<VisitorLogEntry> Visitors { get; set; }
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Post> Posts { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Uid=postgres;Pwd=;Host=localhost;Port=5432;Database=dotnet-test");
+        // Use for sqlite
+        public BloggingContext(DbContextOptions<BloggingContext> options)
+            : base(options)
+        { }
+
+        // Use for postgres
+        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //     => optionsBuilder.UseNpgsql("Host=my_host;Database=my_db;Username=my_user;Password=my_pw");
     }
 
-    public class VisitorLogEntry {
-        public string IpAddress { get; set; }
-        public DateTime TimeStamp { get; set; }
+    public class Blog
+    {
+        public int BlogId { get; set; }
+        public string Url { get; set; }
+
+        public List<Post> Posts { get; set; }
+    }
+
+    public class Post
+    {
+        public int PostId { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+
+        public int BlogId { get; set; }
+        public Blog Blog { get; set; }
     }
 }
+
