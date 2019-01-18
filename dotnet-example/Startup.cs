@@ -36,9 +36,20 @@ namespace dotnet_example
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            var connection = "Data Source=blogging.db";
-            services.AddDbContext<BloggingContext>
-                (options => options.UseSqlite(connection));
+            var connectionstring = Configuration.GetConnectionString("postgres");
+            if (String.IsNullOrEmpty(connectionstring))
+            {
+                // use sqlite
+                connectionstring = "Data Source=blogging.db";
+                services.AddDbContext<BloggingContext>
+                    (options => options.UseSqlite(connectionstring));
+            }
+            else
+            {
+                // use postgres
+                services.AddDbContext<BloggingContext>
+                    (options => options.UseNpgsql(connectionstring));
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

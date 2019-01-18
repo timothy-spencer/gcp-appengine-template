@@ -231,7 +231,7 @@ jobs:
 
             env_variables:
               ASPNETCORE_DEPLOY_ENV: ${DEPLOY_ENV}
-              ASPNETCORE_ConnectionString: Uid=${CLOUDSQL_USERNAME};Pwd=${CLOUDSQL_PASSWORD};Host=cloudsql;Database=dotnet-${DEPLOY_ENV}-visitors
+              CUSTOMCONNSTR_postgres: Uid=${CLOUDSQL_USERNAME};Pwd=${CLOUDSQL_PASSWORD};Host=cloudsql;Database=dotnet-${DEPLOY_ENV}-visitors
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}=tcp:5432

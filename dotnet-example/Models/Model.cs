@@ -5,17 +5,12 @@ namespace dotnet_example.Models
 {
     public class BloggingContext : DbContext
     {
-        public DbSet<Blog> Blogs { get; set; }
-        public DbSet<Post> Posts { get; set; }
-
-        // Use for sqlite
         public BloggingContext(DbContextOptions<BloggingContext> options)
             : base(options)
-        { }
+        { }            
 
-        // Use for postgres
-        // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //     => optionsBuilder.UseNpgsql("Host=my_host;Database=my_db;Username=my_user;Password=my_pw");
+        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Post> Posts { get; set; }
     }
 
     public class Blog
