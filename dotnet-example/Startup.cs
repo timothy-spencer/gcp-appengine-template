@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using dotnet_example.Models;
 using Microsoft.EntityFrameworkCore;
+using Google.Cloud.Diagnostics.AspNetCore;
 
 namespace dotnet_example
 {
@@ -35,6 +36,17 @@ namespace dotnet_example
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            string projectId = Google.Api.Gax.Platform.Instance().ProjectId;
+            if (!string.IsNullOrEmpty(projectId))
+            {
+                services.AddGoogleExceptionLogging(options =>
+                {
+                    options.ProjectId = projectId;
+                    options.ServiceName = "dotnet_example";
+                    options.Version = Configuration["DEPLOY_ENV"];
+                });
+            }
 
             var connectionstring = Configuration.GetConnectionString("postgres");
             if (String.IsNullOrEmpty(connectionstring))
