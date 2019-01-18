@@ -62,7 +62,7 @@ namespace dotnet_example
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Blogs}/{action=Index}/{id?}");
             });
         }
     }
