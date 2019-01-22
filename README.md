@@ -22,8 +22,8 @@ To test locally, run `cd rails-example && bundle install && bin/rails server`.
 
 .NET Core / App Engine
 ======================
-This is an example app from the google cloud platform which keeps track of accesses
-of the app in a db.  This may change, but for now, you must use the netcoreapp2.1
+This is a simple app that creates a list of URLs for "blogs" in a database.  
+This may change, but for now, you must use the netcoreapp2.1
 framework for applications deployed into App Engine.
 
 To test locally, `cd dotnet-example && dotnet run`.
