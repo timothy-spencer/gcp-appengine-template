@@ -12,14 +12,22 @@ using Microsoft.Extensions.DependencyInjection;
 using dotnet_example.Models;
 using Microsoft.EntityFrameworkCore;
 using Google.Cloud.Diagnostics.AspNetCore;
+using ZNetCS.AspNetCore.Authentication.Basic;
+using ZNetCS.AspNetCore.Authentication.Basic.Events;
+using System.Security.Claims;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dotnet_example
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger _logger;
+
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
             Configuration = configuration;
+            _logger = logger;
         }
 
         public IConfiguration Configuration { get; }
@@ -62,11 +70,64 @@ namespace dotnet_example
                 services.AddDbContext<BloggingContext>
                     (options => options.UseNpgsql(connectionstring));
             }
+
+            // set up basic auth here if there is a user
+            var basicauthuser = Configuration["BASICAUTH_USER"];
+            var basicauthpw = Configuration["BASICAUTH_PASSWORD"];
+            if (! String.IsNullOrEmpty(basicauthuser))
+            {
+                _logger.LogInformation("user is {basicauthuser}", basicauthuser);
+                services
+                    .AddAuthentication(BasicAuthenticationDefaults.AuthenticationScheme)
+                    .AddBasicAuthentication(
+                        options =>
+                        {
+                            options.Realm = "dotnet-example";
+                            options.Events = new BasicAuthenticationEvents
+                            {
+                                OnValidatePrincipal = context =>
+                                {
+                                    if ((context.UserName == basicauthuser) && (context.Password == basicauthpw))
+                                    {
+                                        var claims = new List<Claim>
+                                        {
+                                            new Claim(ClaimTypes.Name, context.UserName, context.Options.ClaimsIssuer)
+                                        };
+
+                                        var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, BasicAuthenticationDefaults.AuthenticationScheme));
+                                        context.Principal = principal;
+                                    }
+                                    else 
+                                    {
+                                        // optional with following default.
+                                        // context.AuthenticationFailMessage = "Authentication failed."; 
+                                    }
+
+                                    return Task.CompletedTask;
+                                }
+                            };
+                        });
+            }
+            else
+            {
+                // create an empty authorization that lets everybody in.
+                services.AddAuthorization(x =>
+                    x.DefaultPolicy = new AuthorizationPolicyBuilder()
+                        .RequireAssertion(_ => true)
+                        .Build());
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            var basicauthuser = Configuration["BASICAUTH_USER"];
+            if (! String.IsNullOrEmpty(basicauthuser))
+            {
+                // default authentication initialization
+                app.UseAuthentication();
+            }
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

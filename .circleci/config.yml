@@ -134,8 +134,8 @@ jobs:
               CLOUDSQL_PASSWORD: ${CLOUDSQL_PASSWORD}
               CLOUDSQL_INSTANCE: ${CONNECTION_NAME}
               RAILS_ENV: ${RAILS_ENV}
-              BASICAUTH_PASSWORD: ${BASICAUTH_PASSWORD}
-              BASICAUTH_USER: ${BASICAUTH_USER}
+              BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
+              BASICAUTH_USER: "${BASICAUTH_USER}"
 
             beta_settings:
               cloud_sql_instances: ${CONNECTION_NAME}
@@ -230,7 +230,9 @@ jobs:
             env: flex
 
             env_variables:
-              ASPNETCORE_DEPLOY_ENV: ${DEPLOY_ENV}
+              ASPNETCORE_DEPLOY_ENV: "${DEPLOY_ENV}
+              ASPNETCORE_BASICAUTH_USER: "${BASICAUTH_USER}"
+              ASPNETCORE_BASICAUTH_PASSWORD: "${BASICAUTH_PASSWORD}"
               CUSTOMCONNSTR_postgres: Uid=${CLOUDSQL_USERNAME};Pwd=${CLOUDSQL_PASSWORD};Host=cloudsql;Database=dotnet-${DEPLOY_ENV}-visitors
 
             beta_settings:

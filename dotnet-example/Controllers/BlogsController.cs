@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using dotnet_example.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace dotnet_example.Controllers
 {
+    [Authorize]
+
     public class BlogsController : Controller
     {
         private readonly BloggingContext _context;
